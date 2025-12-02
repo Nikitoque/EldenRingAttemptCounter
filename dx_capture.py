@@ -16,6 +16,3 @@ class DXCapture:
 
     def get_frame(self):
         return self.camera.get_latest_frame()
-
-    def stop(self):
-        self.camera.stop()
