@@ -7,7 +7,7 @@ def ResizeImg():
     start_screen_height = 1440
 
     for monitor in get_monitors():
-        print(f"resize_img script connected!")
+        print(f"---resize_img script connected!---")
         new_screen_height = monitor.height
         new_screen_width = monitor.width
 

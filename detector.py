@@ -1,41 +1,52 @@
-import cv2
+import threading
 import time
+import cv2
 from dx_capture import DXCapture
 from utils import load_template
-from  resize_img import ResizeImg
+from resize_img import ResizeImg
+import overlay
 
-with open("attempts.txt", "r+") as file:
-    attempts = int(file.read())
-    print(f"Attempts: {attempts}")
 
-ResizeImg()
+def detector_thread():
+    with open("attempts.txt", "r+") as file:
+        attempts = int(file.read())
+        overlay.safe_update_label(f"Attempts: {attempts}")
+        print("-----overlay script connected!----")
 
-template = load_template("you_died_resized.png")
-w, h = template.shape[::-1]
+    ResizeImg()
 
-capture = DXCapture(fps=30)
-capture.start()
+    template = load_template("you_died_resized.png")
+    w, h = template.shape[::-1]
 
-print("Detector started!")
-print("----------------------------------")
+    capture = DXCapture(fps=30)
+    capture.start()
 
-prev_time = time.time()
+    print("--------Detector started!---------")
+    print("----------------------------------")
 
-while True:
-    frame = capture.get_frame()
-    if frame is None:
-        continue
+    while True:
+        frame = capture.get_frame()
+        if frame is None:
+            continue
 
-    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
 
-    res = cv2.matchTemplate(gray, template, cv2.TM_CCOEFF_NORMED)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(res)
+        if max_val > 0.62:
+            attempts += 1
 
-    if max_val > 0.62:
-        print(f"[DETECTED] YOU DIED! score={max_val:.3f}")
-        attempts += 1
-        print(f"Attempts now: {attempts}")
-        print("----------------------------------")
-        with open("attempts.txt", "w") as f:
-            f.write(str(attempts))
-        time.sleep(8)
+            with open("attempts.txt", "w") as f:
+                f.write(str(attempts))
+
+            overlay.safe_update_label(f"Attempts: {attempts}")
+
+            print(f"[DETECTED] YOU DIED! attempts={attempts}")
+            print("----------------------------------")
+
+            time.sleep(8)
+
+
+threading.Thread(target=detector_thread, daemon=True).start()
+
+overlay.start_overlay()
