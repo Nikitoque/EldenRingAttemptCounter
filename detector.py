@@ -2,20 +2,21 @@ import cv2
 import time
 from dx_capture import DXCapture
 from utils import load_template
-
-attempts = 0
+from  resize_img import ResizeImg
 
 with open("attempts.txt", "r+") as file:
     attempts = int(file.read())
     print(f"Attempts: {attempts}")
 
-template = load_template("you_died.png")
+ResizeImg()
+
+template = load_template("you_died_resized.png")
 w, h = template.shape[::-1]
 
 capture = DXCapture(fps=30)
 capture.start()
 
-print("Детектор запущен!")
+print("Detector started!")
 print("----------------------------------")
 
 prev_time = time.time()
