@@ -2,16 +2,20 @@ import threading
 import time
 import cv2
 from dx_capture import DXCapture
+from overlay import data_json
 from utils import load_template
 from resize_img import ResizeImg
 import overlay
+import json
 
 
 def detector_thread():
-    with open("attempts.txt", "r+") as file:
-        attempts = int(file.read())
-        overlay.safe_update_label(f"Attempts: {attempts}")
-        print("-----overlay script connected!----")
+
+
+    attempts = int(data_json["deaths"])
+    overlay.safe_update_label(f"Attempts: {attempts}")
+    print("-----overlay script connected!----")
+
 
     ResizeImg()
 
@@ -35,9 +39,10 @@ def detector_thread():
 
         if max_val > 0.62:
             attempts += 1
+            data_json["deaths"] = attempts
 
-            with open("attempts.txt", "w") as f:
-                f.write(str(attempts))
+            with open("data.json", "w") as f:
+                json.dump(data_json, f, indent=4, ensure_ascii=False)
 
             overlay.safe_update_label(f"Attempts: {attempts}")
 
