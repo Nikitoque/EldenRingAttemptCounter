@@ -2,8 +2,12 @@ import tkinter as tk
 import json
 import os
 from PIL import Image, ImageTk
-import threading
-#from detector import start_detector
+
+def start_detector():
+        import overlay
+        import detector
+        overlay.start_overlay()
+
 
 # ---------- Загрузка JSON ----------
 def load_data_on_start():
@@ -28,6 +32,23 @@ def save_data():
 def select_color(color):
     selected_color.set(color)
     print("Выбран цвет:", color)
+
+pressed = False
+def toggle_overlay():
+    global pressed
+
+    if not pressed:
+        # нажали старт
+        start_detector()        # запускает detector
+        __import__("overlay").start_overlay()  # запускает overlay
+        pressed = True
+        print("Overlay started")
+    else:
+        # нажали стоп
+        __import__("overlay").stop_overlay()   # закрывает overlay
+        pressed = False
+        print("Overlay stopped")
+
 
 
 # ---------- Тёмная тема ----------
@@ -125,28 +146,15 @@ save_btn.grid(row=6, column=0, columnspan=3, pady=5)
 
 start_btn = tk.Button(
     root,
-    text="Старт",
-    command=save_data,
+    text="Старт / Стоп",
+    command=toggle_overlay,
     bg="#3a3a3a",
     fg="white",
     font=FONT,
     width=12,
     height=1
 )
+
 start_btn.grid(row=7, column=0, columnspan=3, pady=5, padx =5)
-
-start_btn = tk.Button(
-    root,
-    text="Стоп",
-    command=save_data,
-    bg="#3a3a3a",
-    fg="white",
-    font=FONT,
-    width=12,
-    height=1
-)
-start_btn.grid(row=8, column=0, columnspan=3, pady=5, padx =5)
-
-
 
 root.mainloop()

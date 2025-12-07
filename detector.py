@@ -2,7 +2,6 @@ import threading
 import time
 import cv2
 from dx_capture import DXCapture
-from overlay import data_json
 from utils import load_template
 from resize_img import ResizeImg
 import overlay
@@ -52,6 +51,7 @@ def detector_thread():
             time.sleep(8)
 
 
-threading.Thread(target=detector_thread, daemon=True).start()
+def start_detector():
+    threading.Thread(target=detector_thread, daemon=True).start()
 
 overlay.start_overlay()
