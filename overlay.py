@@ -1,18 +1,41 @@
 import tkinter as tk
-import ctypes
 import json
+import detector
 
 overlay = None
 label = None
 running = False
 
 
+def stop_overlay():
+    global overlay, running
+
+    running = False
+
+    # Остановить DXCam корректно
+    detector.stop_detector()
+
+    if detector.capture:
+        try:
+            detector.capture.stop()
+        except:
+            pass
+        detector.capture = None
+
+    if overlay is not None:
+        try:
+            overlay.destroy()
+        except:
+            pass
+
+    overlay = None
+
+
 def start_overlay():
-    """Создание окна и запуск цикла"""
     global overlay, label, running
 
     if overlay is not None:
-        return  # уже запущено
+        return  # уже работает
 
     with open("data.json", "r") as f:
         data = json.load(f)
@@ -25,7 +48,7 @@ def start_overlay():
 
     label = tk.Label(
         overlay,
-        text="Attempts: 0",
+        text="Deaths: 0",
         font=("Segoe UI", int(data["font_size"]), "bold"),
         fg=data["color"],
         bg="magenta"
@@ -45,11 +68,10 @@ def start_overlay():
 
 
 def update_loop():
-    """Цикл обновления overlay"""
     global overlay, running
 
     if not running or overlay is None:
-        return  # прекращаем цикл!
+        return
 
     try:
         overlay.update()
@@ -59,20 +81,6 @@ def update_loop():
 
     overlay.after(15, update_loop)
 
-
-def stop_overlay():
-    """Корректное закрытие окна"""
-    global overlay, running
-
-    running = False
-
-    if overlay is not None:
-        try:
-            overlay.destroy()
-        except:
-            pass
-
-    overlay = None
 
 
 def safe_update_label(text):
